@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vital Finance API — Reference</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Albert+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        display: ['Fraunces', 'serif'],
+        body: ['Albert Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        ink: '#0c0a09',
+        paper: '#f4f1ea',
+        lime: '#c6f135',
+        coral: '#ff5d3b',
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root { --ink:#0c0a09; --paper:#f4f1ea; }
+  html { scroll-behavior: smooth; }
+  body { background:var(--paper); }
+  ::selection { background:#c6f135; color:#0c0a09; }
+  .grain::before {
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:50; opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .method-tag { letter-spacing:.04em; }
+  .code-scroll::-webkit-scrollbar { height:8px; width:8px; }
+  .code-scroll::-webkit-scrollbar-thumb { background:#3a3735; border-radius:4px; }
+  .code-scroll::-webkit-scrollbar-track { background:#1c1917; }
+  details > summary { list-style:none; cursor:pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+  details[open] .chev { transform:rotate(90deg); }
+  pre { tab-size:2; }
+  .tok-key { color:#c6f135; }
+  .tok-str { color:#fca5a5; }
+  .tok-punct { color:#78716c; }
+  .tok-bool { color:#7dd3fc; }
+  @keyframes rise { from { opacity:0; transform:translateY(14px);} to {opacity:1; transform:none;} }
+  .rise { animation:rise .6s cubic-bezier(.2,.7,.2,1) both; }
+  .verb-post { color:#c6f135; }
+  .verb-put  { color:#7dd3fc; }
+  .pill { display:inline-block; padding:.1rem .45rem; border:1px solid #0c0a09; font-family:'JetBrains Mono',monospace; font-size:10px; }
+</style>
+</head>
+<body class="grain font-body text-ink antialiased">
+
+<!-- ░░░ HEADER ░░░ -->
+<header class="border-b-2 border-ink sticky top-0 z-40 bg-paper/90 backdrop-blur">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+    <div class="flex items-baseline gap-3">
+      <span class="font-display font-black text-2xl tracking-tight">Vital&nbsp;Finance</span>
+      <span class="font-mono text-[11px] uppercase tracking-widest bg-lime px-2 py-0.5 border border-ink">API v1</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
+      <a href="#auth" class="px-3 py-2 hover:bg-ink hover:text-paper transition">AUTH</a>
+      <a href="#create-user" class="px-3 py-2 hover:bg-ink hover:text-paper transition">USERS</a>
+      <a href="#update-user" class="px-3 py-2 hover:bg-ink hover:text-paper transition">UPDATE</a>
+      <a href="#reset-pin" class="px-3 py-2 hover:bg-ink hover:text-paper transition">PIN</a>
+      <a href="#login" class="px-3 py-2 hover:bg-ink hover:text-paper transition">LOGIN</a>
+      <a href="#deposit" class="px-3 py-2 hover:bg-ink hover:text-paper transition">DEPOSIT</a>
+    </nav>
+    <code class="hidden lg:block font-mono text-[11px] text-stone-500">dev-vital-finance-infra.vercel.app</code>
+  </div>
+</header>
+
+<!-- ░░░ HERO ░░░ -->
+<section class="border-b-2 border-ink overflow-hidden">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 py-16 md:py-24 grid md:grid-cols-12 gap-8 items-end">
+    <div class="md:col-span-8 rise">
+      <p class="font-mono text-xs uppercase tracking-[0.3em] text-coral mb-5">REST · JSON · Bearer Auth</p>
+      <h1 class="font-display font-black leading-[0.92] text-5xl md:text-7xl tracking-tight">
+        Onboard users.<br>Spin up <span class="italic text-coral">wallets.</span><br>Move money.
+      </h1>
+      <p class="mt-7 max-w-xl text-lg text-stone-700">
+        A partner-facing API for provisioning users, custodial Solana wallets, and authenticated sessions. The Bearer token carries your partner identity &mdash; no <span class="font-mono text-xs">partner_id</span> header required.
+      </p>
+    </div>
+    <div class="md:col-span-4">
+      <div class="border-2 border-ink bg-ink text-paper p-5 font-mono text-xs leading-relaxed">
+        <div class="flex items-center gap-1.5 mb-4">
+          <span class="w-2.5 h-2.5 rounded-full bg-coral"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-lime"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-stone-500"></span>
+          <span class="ml-2 text-stone-500">base_url</span>
+        </div>
+        <p class="text-[10px] uppercase tracking-widest text-lime mb-1">STG</p>
+        <p class="break-all mb-4"><span class="text-lime">https://</span>dev-vital-finance-infra.vercel.app</p>
+        <p class="text-[10px] uppercase tracking-widest text-coral mb-1">PRD</p>
+        <p class="text-stone-400 normal-case">Communicated via email</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░░ BODY ░░░ -->
+<div class="max-w-7xl mx-auto px-5 md:px-8 py-12 grid md:grid-cols-12 gap-10">
+
+  <!-- SIDEBAR -->
+  <aside class="md:col-span-3 hidden md:block">
+    <div class="sticky top-24 space-y-1 font-mono text-xs">
+      <p class="uppercase tracking-widest text-stone-400 mb-3 text-[10px]">Endpoints</p>
+      <a href="#auth" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Authorization</span>
+      </a>
+      <a href="#create-user" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Create User</span>
+      </a>
+      <a href="#update-user" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-put bg-ink px-1.5 py-0.5 method-tag">PUT</span><span>Update User</span>
+      </a>
+      <a href="#reset-pin" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Reset PIN</span>
+      </a>
+      <a href="#login" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Login</span>
+      </a>
+      <a href="#deposit" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Log User / Deposit</span>
+      </a>
+      <a href="#wallet" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="text-coral">#</span><span>Wallet object</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="md:col-span-9 space-y-20">
+
+    <!-- AUTH MODEL -->
+    <section>
+      <div class="border-l-4 border-coral pl-5 mb-8">
+        <h2 class="font-display font-black text-3xl">Authentication model</h2>
+        <p class="text-stone-600 mt-2">Every protected route runs the <code class="font-mono text-xs">fastify.authenticate</code> preHandler. The JWT encodes your partner identity &mdash; partner authorization (LOGIN / EDIT / TRANSFER / PIN / EXCHANGE) is resolved server-side from the token.</p>
+      </div>
+      <div class="border-2 border-ink bg-lime p-5 flex items-start gap-4">
+        <span class="font-display font-black text-3xl leading-none">!</span>
+        <div>
+          <p class="font-bold text-sm">No <code class="font-mono">partner_id</code> header.</p>
+          <p class="text-sm text-ink/80 mt-1">Partner identity is managed through the Bearer token. Do not send a <code class="font-mono text-xs">partner_id</code> header on any request.</p>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-3 font-mono text-xs mt-6">
+        <div class="border-2 border-ink p-4">
+          <span class="text-3xl font-display font-black block mb-1">01</span>
+          <p class="text-stone-600">Partner authorizes with email + password → receives <span class="text-coral">token</span>.</p>
+        </div>
+        <div class="border-2 border-ink p-4">
+          <span class="text-3xl font-display font-black block mb-1">02</span>
+          <p class="text-stone-600">Use that token to create &amp; manage users.</p>
+        </div>
+        <div class="border-2 border-ink p-4 bg-ink text-paper">
+          <span class="text-3xl font-display font-black block mb-1 text-lime">03</span>
+          <p class="text-stone-300">User logs in with phone + PIN → access &amp; refresh tokens + wallet.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 1: AUTH -->
+    <section id="auth" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-post bg-ink px-2.5 py-1 method-tag">POST</span>
+        <code class="font-mono text-sm md:text-base font-bold">/partners/authorization</code>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Exchange partner credentials for a secret key (JWT). This token authorizes all subsequent <span class="font-mono text-xs">/users</span> and <span class="font-mono text-xs">/auth</span> calls.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Request body</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Field</span><span class="col-span-3">Type</span><span class="col-span-6">Description</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral">email</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600">Partner account email.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral">password</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600">Partner account password.</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> --location \
+  '<span class="tok-str">.../partners/authorization</span>' \
+  --header '<span class="tok-key">Content-Type</span>: application/json' \
+  --data-raw '{
+    <span class="tok-key">"email"</span><span class="tok-punct">:</span> <span class="tok-str">""</span>,
+    <span class="tok-key">"password"</span><span class="tok-punct">:</span> <span class="tok-str">""</span>
+  }'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>200 — Response</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"token"</span><span class="tok-punct">:</span> <span class="tok-str">"eyJhbGciOiJIUzI1Ni...."</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 2: CREATE USER -->
+    <section id="create-user" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-post bg-ink px-2.5 py-1 method-tag">POST</span>
+        <code class="font-mono text-sm md:text-base font-bold">/users</code>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Create a user. Requires a JWT Bearer token (<code class="font-mono text-xs">fastify.authenticate</code>). If a wallet already exists for the phone it is linked; otherwise a new custodial wallet is created.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Headers</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Header</span><span class="col-span-2">Required</span><span class="col-span-7">Description</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">Authorization</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">Bearer &lt;JWT&gt;</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">Content-Type</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">application/json</span>
+        </div>
+      </div>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Body <span class="text-stone-300 normal-case">— user.controller.ts:7-12</span></h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Field</span><span class="col-span-3">Type</span><span class="col-span-6">Description</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">phone</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600 text-xs">E.164 or local. Normalized to <span class="font-mono">&lt;phone&gt;@vf.com</span> if it has no <span class="font-mono">@</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">pin</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600 text-xs">Login PIN.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">metadata.user</code><span class="col-span-3 font-mono text-xs text-stone-500">object</span><span class="col-span-6 text-stone-600 text-xs">first_name, last_name.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">via_api</code><span class="col-span-3 font-mono text-xs text-stone-500">boolean</span><span class="col-span-6 text-stone-600 text-xs"><span class="font-mono">true</span> seeds 0.0001 HTGV + 0.0001 USDC from the service-fee wallet to the new wallet.</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>Minimal request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> -X POST https://dev-vital-finance-infra.vercel.app/users \
+  -H "<span class="tok-key">Authorization</span>: Bearer $JWT" \
+  -H "<span class="tok-key">Content-Type</span>: application/json" \
+  -d '{
+    <span class="tok-key">"phone"</span><span class="tok-punct">:</span> <span class="tok-str">"50931234567"</span>,
+    <span class="tok-key">"pin"</span><span class="tok-punct">:</span> <span class="tok-str">"1234"</span>
+  }'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>With metadata + via_api</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> -X POST https://dev-vital-finance-infra.vercel.app/users \
+  -H "<span class="tok-key">Authorization</span>: Bearer $JWT" \
+  -H "<span class="tok-key">Content-Type</span>: application/json" \
+  -d '{
+    <span class="tok-key">"phone"</span><span class="tok-punct">:</span> <span class="tok-str">"50931234567"</span>,
+    <span class="tok-key">"pin"</span><span class="tok-punct">:</span> <span class="tok-str">"1234"</span>,
+    <span class="tok-key">"metadata"</span><span class="tok-punct">:</span> {
+      <span class="tok-key">"user"</span><span class="tok-punct">:</span> {
+        <span class="tok-key">"first_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Jean"</span>,
+        <span class="tok-key">"last_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Beaudry"</span>
+      }
+    },
+    <span class="tok-key">"via_api"</span><span class="tok-punct">:</span> <span class="tok-bool">true</span>
+  }'</pre>
+        </div>
+      </div>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mt-6 mb-3">Responses</h4>
+      <div class="border-2 border-ink">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-2">Code</span><span class="col-span-10">Body</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-lime w-fit">201</span><span class="col-span-10 text-stone-600 text-xs">Created user object (final state after wallet link/create).</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">409</span><code class="col-span-10 font-mono text-xs text-stone-600">{ "error": true, "code": "USER_EXIST" }</code>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">500</span><code class="col-span-10 font-mono text-xs text-stone-600">{ "error": "&lt;message&gt;" }</code>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 3: UPDATE USER -->
+    <section id="update-user" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-put bg-ink px-2.5 py-1 method-tag">PUT</span>
+        <code class="font-mono text-sm md:text-base font-bold">/users/:id</code>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Update allowed fields on a user. The caller's partner identity (from the token) must carry the <span class="pill bg-lime">EDIT</span> action in the user's <code class="font-mono text-xs">allowed_partners</code>. Protected fields are rejected.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Path params</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 px-4 py-3 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">id</code><span class="col-span-9 text-stone-600 text-xs">Target user's ID.</span>
+        </div>
+      </div>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Body</h4>
+      <p class="text-sm text-stone-600 mb-4">Non-empty JSON object. The following fields are <span class="font-bold text-coral">rejected</span> if present:</p>
+      <div class="flex flex-wrap gap-2 mb-6 font-mono text-xs">
+        <span class="pill bg-paper">id</span><span class="pill bg-paper">phone</span><span class="pill bg-paper">partner_id</span><span class="pill bg-paper">allowed_partners</span><span class="pill bg-paper">wallet_id</span><span class="pill bg-paper">wallet_address</span>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> -X PUT \
+  "https://api.example.com/users/USER_ID" \
+  -H "<span class="tok-key">Authorization</span>: Bearer $JWT" \
+  -H "<span class="tok-key">Content-Type</span>: application/json" \
+  -d '{
+    <span class="tok-key">"first_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Jean"</span>,
+    <span class="tok-key">"last_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Beaudry"</span>,
+    <span class="tok-key">"email"</span><span class="tok-punct">:</span> <span class="tok-str">"jean@example.com"</span>
+  }'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>Responses</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="tok-bool">200</span> OK  <span class="tok-punct">// updated user object</span>
+
+<span class="tok-bool">400</span> {<span class="tok-key">"success"</span>:<span class="tok-bool">false</span>,<span class="tok-key">"message"</span>:
+     <span class="tok-str">"Request body must be a</span>
+     <span class="tok-str"> non-empty object"</span>}
+<span class="tok-bool">400</span> {... <span class="tok-str">"Cannot update protected</span>
+     <span class="tok-str"> fields: phone, wallet_id"</span>}
+
+<span class="tok-bool">403</span> {<span class="tok-key">"success"</span>:<span class="tok-bool">false</span>,<span class="tok-key">"message"</span>:
+     <span class="tok-str">"Operation not allowed"</span>}
+
+<span class="tok-bool">404</span> {<span class="tok-key">"success"</span>:<span class="tok-bool">false</span>,<span class="tok-key">"message"</span>:
+     <span class="tok-str">"User not found"</span>}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 4: RESET PIN -->
+    <section id="reset-pin" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-post bg-ink px-2.5 py-1 method-tag">POST</span>
+        <code class="font-mono text-sm md:text-base font-bold">/auth/partner/reset-pin</code>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Resets a user's 6-digit PIN. The caller's partner identity (from the token) must include the <span class="pill bg-lime">PIN</span> action in the target user's <code class="font-mono text-xs">allowed_partners</code>.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Body</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Field</span><span class="col-span-3">Type</span><span class="col-span-6">Description</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">user_id</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600 text-xs">UUID of target user.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">pin</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600 text-xs">Exactly 6 digits.</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> -X POST \
+  'https://&lt;host&gt;/auth/partner/reset-pin' \
+  -H '<span class="tok-key">Authorization</span>: Bearer $JWT' \
+  -H '<span class="tok-key">Content-Type</span>: application/json' \
+  -d '{
+    <span class="tok-key">"user_id"</span><span class="tok-punct">:</span> <span class="tok-str">"11111111-2222-3333-..."</span>,
+    <span class="tok-key">"pin"</span><span class="tok-punct">:</span> <span class="tok-str">"123456"</span>
+  }'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>Responses</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="tok-bool">200</span> {<span class="tok-key">"success"</span>:<span class="tok-bool">true</span>,<span class="tok-key">"message"</span>:
+     <span class="tok-str">"Password has been changed"</span>}
+
+<span class="tok-bool">400</span> <span class="tok-str">"user_id and/or pin missing"</span>
+<span class="tok-bool">400</span> <span class="tok-str">"PIN must be exactly 6 digits"</span>
+<span class="tok-bool">403</span> <span class="tok-str">"Operation not allowed"</span>
+<span class="tok-bool">404</span> <span class="tok-str">"User not found"</span>
+<span class="tok-bool">500</span> <span class="tok-str">"&lt;error message&gt;"</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 5: LOGIN -->
+    <section id="login" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-post bg-ink px-2.5 py-1 method-tag">POST</span>
+        <code class="font-mono text-sm md:text-base font-bold">/users/login</code>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Authenticate a user with phone + PIN. Returns access/refresh tokens and the user's profile, including their provisioned Solana wallet.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Request body</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Field</span><span class="col-span-3">Type</span><span class="col-span-6">Description</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral">phone</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600">Registered user phone.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral">pin</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600">User PIN.</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> --location '<span class="tok-str">.../users/login</span>' \
+  --header '<span class="tok-key">Content-Type</span>: application/json' \
+  --header '<span class="tok-key">Authorization</span>: Bearer ....' \
+  --data '{
+    <span class="tok-key">"phone"</span><span class="tok-punct">:</span> <span class="tok-str">"5093333..."</span>,
+    <span class="tok-key">"pin"</span><span class="tok-punct">:</span> <span class="tok-str">"000000"</span>
+  }'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>200 — Response</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono" style="max-height:380px;">{
+  <span class="tok-key">"id"</span><span class="tok-punct">:</span> <span class="tok-str">"57293bed-7916-4edd-..."</span>,
+  <span class="tok-key">"phone"</span><span class="tok-punct">:</span> <span class="tok-str">"50933330000"</span>,
+  <span class="tok-key">"accessToken"</span><span class="tok-punct">:</span> <span class="tok-str">"YsSFxYEobPYe1dwRKpQ...."</span>,
+  <span class="tok-key">"refreshToken"</span><span class="tok-punct">:</span> <span class="tok-str">"fs5sdt3heun3"</span>,
+  <span class="tok-key">"data"</span><span class="tok-punct">:</span> {
+    <span class="tok-key">"email"</span><span class="tok-punct">:</span> <span class="tok-str">"50933330000@vf.com"</span>,
+    <span class="tok-key">"first_name"</span><span class="tok-punct">:</span> <span class="tok-str">"u"</span>,
+    <span class="tok-key">"last_name"</span><span class="tok-punct">:</span> <span class="tok-str">"i"</span>,
+    <span class="tok-key">"wallet_address"</span><span class="tok-punct">:</span> <span class="tok-str">"BzYNKwvF8e...YH3R"</span>,
+    <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-str">"6a8b17ff-2589-..."</span>,
+    <span class="tok-key">"account_type"</span><span class="tok-punct">:</span> <span class="tok-str">"CUSTOMER"</span>,
+    <span class="tok-key">"partner_id"</span><span class="tok-punct">:</span> <span class="tok-str">"94e5300a-f046-..."</span>,
+    <span class="tok-key">"kyc"</span><span class="tok-punct">:</span> <span class="tok-bool">null</span>,
+    <span class="tok-key">"accounts"</span><span class="tok-punct">:</span> [],
+    <span class="tok-key">"extra"</span><span class="tok-punct">:</span> { <span class="tok-punct">/* wallet → see below */</span> }
+  }
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 6: LOG USER / DEPOSIT -->
+    <section id="deposit" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-post bg-ink px-2.5 py-1 method-tag">POST</span>
+        <code class="font-mono text-sm md:text-base font-bold">/api/partner/log-user</code>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Authenticate a user on the partner's behalf and receive a hosted widget link the user opens to complete a deposit. All inputs are passed as <span class="font-bold">headers</span>; the request body is empty.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Headers</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Header</span><span class="col-span-2">Required</span><span class="col-span-7">Description</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">access_token</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">User's access token (JWT) from <span class="font-mono">/users/login</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">external_address</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">External Solana address tied to the operation.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">init_op</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">Operation to initialize, e.g. <span class="font-mono">deposit</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">amount</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">Operation amount, e.g. <span class="font-mono">500</span>.</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> --location --request POST \
+  'https://dev-vital-finance-infra.vercel.app/api/partner/log-user' \
+  --header '<span class="tok-key">access_token</span>: eyJhbGciOiJIUzI1NiI....' \
+  --header '<span class="tok-key">external_address</span>: 4kmMvyEtpJed...44z8' \
+  --header '<span class="tok-key">init_op</span>: deposit' \
+  --header '<span class="tok-key">amount</span>: 500' \
+  --data ''</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>200 — Response</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"ok"</span><span class="tok-punct">:</span> <span class="tok-bool">1</span>,
+  <span class="tok-key">"url_deposit"</span><span class="tok-punct">:</span> <span class="tok-str">"https://widget-vitvit-cash-new.vercel.app</span>
+    <span class="tok-str">/partner/deposit</span>
+    <span class="tok-str">?clientId=57293bed-...f8b2</span>
+    <span class="tok-str">&amp;phone=50933330000</span>
+    <span class="tok-str">&amp;partner_id=99b6d390-...91196</span>
+    <span class="tok-str">&amp;first_name=Hello 2</span>
+    <span class="tok-str">&amp;external_address=4kmMvy...44z8</span>
+    <span class="tok-str">&amp;amount=500</span>
+    <span class="tok-str">&amp;access_token=eyJhbGci...."</span>
+}</pre>
+        </div>
+      </div>
+
+      <div class="border-2 border-ink bg-lime p-5 flex items-start gap-4 mt-6">
+        <span class="font-display font-black text-2xl leading-none">→</span>
+        <div>
+          <p class="font-bold text-sm">Redirect the user to <code class="font-mono text-xs">url_deposit</code>.</p>
+          <p class="text-sm text-ink/80 mt-1">The returned link opens the hosted deposit widget pre-filled with the client, phone, partner, amount, and a scoped access token.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WALLET OBJECT -->
+    <section id="wallet" class="scroll-mt-24">
+      <div class="border-l-4 border-lime pl-5 mb-8">
+        <h2 class="font-display font-black text-3xl">The Wallet object</h2>
+        <p class="text-stone-600 mt-2">Returned under <code class="font-mono text-xs">data.extra.wallet</code>. A developer-custodied Solana account, provisioned per user.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="border-2 border-ink">
+          <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+            <span class="col-span-4">Field</span><span class="col-span-8">Value / meaning</span>
+          </div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">id</code><span class="col-span-8 text-stone-600 text-xs">Internal wallet UUID</span></div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">refId</code><span class="col-span-8 text-stone-600 text-xs">Reference (phone number)</span></div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">state</code><span class="col-span-8 text-stone-600 text-xs"><span class="bg-lime px-1.5 py-0.5 font-mono">LIVE</span></span></div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">address</code><span class="col-span-8 text-stone-600 text-xs break-all">Solana public key</span></div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">blockchain</code><span class="col-span-8 text-stone-600 text-xs">SOL-DEVNET</span></div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">accountType</code><span class="col-span-8 text-stone-600 text-xs">EOA</span></div>
+          <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center"><code class="col-span-4 font-mono text-coral text-xs">custodyType</code><span class="col-span-8 text-stone-600 text-xs">DEVELOPER</span></div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>wallet</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"id"</span><span class="tok-punct">:</span> <span class="tok-str">"6a8b17ff-2589-5da9-..."</span>,
+  <span class="tok-key">"name"</span><span class="tok-punct">:</span> <span class="tok-str">"phone"</span>,
+  <span class="tok-key">"refId"</span><span class="tok-punct">:</span> <span class="tok-str">"50933330000"</span>,
+  <span class="tok-key">"state"</span><span class="tok-punct">:</span> <span class="tok-str">"LIVE"</span>,
+  <span class="tok-key">"address"</span><span class="tok-punct">:</span> <span class="tok-str">"BzYNKwvF8ePWdS64...YH3R"</span>,
+  <span class="tok-key">"blockchain"</span><span class="tok-punct">:</span> <span class="tok-str">"SOL-DEVNET"</span>,
+  <span class="tok-key">"accountType"</span><span class="tok-punct">:</span> <span class="tok-str">"EOA"</span>,
+  <span class="tok-key">"custodyType"</span><span class="tok-punct">:</span> <span class="tok-str">"DEVELOPER"</span>,
+  <span class="tok-key">"walletSetId"</span><span class="tok-punct">:</span> <span class="tok-str">"0dcdd6e1-0ecf-..."</span>,
+  <span class="tok-key">"createDate"</span><span class="tok-punct">:</span> <span class="tok-str">"2026-05-29T21:45:46Z"</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ░░░ FOOTER ░░░ -->
+<footer class="border-t-2 border-ink mt-12">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 py-10 flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+    <span class="font-display font-black text-xl">Vital Finance API</span>
+    <code class="font-mono text-[11px] text-stone-500">dev-vital-finance-infra.vercel.app · Bearer auth · JSON · partner identity via token</code>
+  </div>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('aside a[href^="#"]');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('border-ink'));
+        const active = document.querySelector(`aside a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('border-ink');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
