@@ -52,6 +52,7 @@ tailwind.config = {
   .rise { animation:rise .6s cubic-bezier(.2,.7,.2,1) both; }
   .verb-post { color:#c6f135; }
   .verb-put  { color:#7dd3fc; }
+  .verb-get  { color:#fbbf24; }
   .pill { display:inline-block; padding:.1rem .45rem; border:1px solid #0c0a09; font-family:'JetBrains Mono',monospace; font-size:10px; }
 </style>
 </head>
@@ -66,11 +67,14 @@ tailwind.config = {
     </div>
     <nav class="hidden md:flex items-center gap-1 font-mono text-xs">
       <a href="#auth" class="px-3 py-2 hover:bg-ink hover:text-paper transition">AUTH</a>
+      <a href="#webhooks" class="px-3 py-2 hover:bg-ink hover:text-paper transition">WEBHOOKS</a>
       <a href="#create-user" class="px-3 py-2 hover:bg-ink hover:text-paper transition">USERS</a>
       <a href="#update-user" class="px-3 py-2 hover:bg-ink hover:text-paper transition">UPDATE</a>
       <a href="#reset-pin" class="px-3 py-2 hover:bg-ink hover:text-paper transition">PIN</a>
       <a href="#login" class="px-3 py-2 hover:bg-ink hover:text-paper transition">LOGIN</a>
-      <a href="#deposit" class="px-3 py-2 hover:bg-ink hover:text-paper transition">DEPOSIT</a>
+      <a href="#lookup" class="px-3 py-2 hover:bg-ink hover:text-paper transition">LOOKUP</a>
+      <a href="#deposit" class="px-3 py-2 hover:bg-ink hover:text-paper transition">DEPOSIT / WITHDRAW</a>
+    </nav>
     </nav>
     <div class="flex items-center gap-3">
       <code class="hidden xl:block font-mono text-[11px] text-stone-500">dev-vital-finance-infra.vercel.app</code>
@@ -121,6 +125,9 @@ tailwind.config = {
       <a href="#auth" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
         <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Authorization</span>
       </a>
+      <a href="#webhooks" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Configure Webhook</span>
+      </a>
       <a href="#create-user" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
         <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Create User</span>
       </a>
@@ -133,8 +140,11 @@ tailwind.config = {
       <a href="#login" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
         <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Login</span>
       </a>
+      <a href="#lookup" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
+        <span class="verb-get bg-ink px-1.5 py-0.5 method-tag">GET</span><span>Lookup User</span>
+      </a>
       <a href="#deposit" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
-        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Log User / Deposit</span>
+        <span class="verb-post bg-ink px-1.5 py-0.5 method-tag">POST</span><span>Log User · Deposit / Withdraw</span>
       </a>
       <a href="#wallet" class="flex items-center gap-2 px-3 py-2 border border-ink/10 hover:border-ink transition">
         <span class="text-coral">#</span><span>Wallet object</span>
@@ -498,6 +508,70 @@ tailwind.config = {
       </div>
     </section>
 
+    <!-- ENDPOINT 5b: LOOKUP USER -->
+    <section id="lookup" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-get bg-ink px-2.5 py-1 method-tag">GET</span>
+        <code class="font-mono text-sm md:text-base font-bold">/users/:lookup/:value/key-value</code>
+        <button data-copy="lookup" class="copy-btn ml-auto font-mono text-[11px] uppercase tracking-wider border-2 border-ink px-3 py-1.5 hover:bg-ink hover:text-paper transition flex items-center gap-1.5">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span class="label">Copy for LLM</span>
+        </button>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Look up a user and get a compact key-value profile. Look up by <span class="font-mono text-xs">phone</span> or by <span class="font-mono text-xs">id</span>. Requires the partner <span class="font-mono text-xs">Bearer</span> token.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Path variants</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-5">Route</span><span class="col-span-7">Looks up by</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-5 font-mono text-coral text-xs break-all">/users/phone/:phone/key-value</code><span class="col-span-7 text-stone-600 text-xs">Phone number, e.g. <span class="font-mono">50933330006</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-5 font-mono text-coral text-xs break-all">/users/id/:id/key-value</code><span class="col-span-7 text-stone-600 text-xs">User UUID, e.g. <span class="font-mono">5df69f59-...e98a</span>.</span>
+        </div>
+      </div>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Headers</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 px-4 py-3 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">Authorization</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">Bearer &lt;PARTNER_SECRET&gt;</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL — by phone</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> --location \
+  'http://127.0.0.1:3002/users/phone/<span class="tok-str">50933330006</span>/key-value' \
+  --header '<span class="tok-key">Authorization</span>: Bearer PARTNER_SECRET'</pre>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider mt-4">
+            <span>cURL — by id</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> --location \
+  'http://127.0.0.1:3002/users/id/<span class="tok-str">5df69f59-...e98a</span>/key-value' \
+  --header '<span class="tok-key">Authorization</span>: Bearer PARTNER_SECRET'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>200 — Response</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"id"</span><span class="tok-punct">:</span> <span class="tok-str">"5df69f59-8a81-4d53-a3a2-5f9ea531e98a"</span>,
+  <span class="tok-key">"phone"</span><span class="tok-punct">:</span> <span class="tok-str">"50933330006"</span>,
+  <span class="tok-key">"first_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Hello_1"</span>,
+  <span class="tok-key">"last_name"</span><span class="tok-punct">:</span> <span class="tok-str">"test"</span>,
+  <span class="tok-key">"wallet_address"</span><span class="tok-punct">:</span> <span class="tok-str">"7MczvZNNpUXWPwtBncCdv554UiuGLqgVwCjqLG65XMpy"</span>,
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-str">"b544dc12-551d-52fe-8745-3d3cfc5efc71"</span>,
+  <span class="tok-key">"kyc"</span><span class="tok-punct">:</span> <span class="tok-bool">null</span>
+}</pre>
+        </div>
+      </div>
+    </section>
+
     <!-- ENDPOINT 6: LOG USER / DEPOSIT -->
     <section id="deposit" class="scroll-mt-24">
       <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -508,38 +582,93 @@ tailwind.config = {
           <span class="label">Copy for LLM</span>
         </button>
       </div>
-      <p class="text-stone-700 mb-6 max-w-2xl">Authenticate a user on the partner's behalf and receive a hosted widget link the user opens to complete a deposit. All inputs are passed as <span class="font-bold">headers</span>; the request body is empty.</p>
+      <p class="text-stone-700 mb-6 max-w-2xl">Logs a partner-initiated user session and returns a URL to redirect the user to. The <code class="font-mono text-xs">init_op</code> drives the flow: <span class="font-mono text-xs">deposit</span> returns <code class="font-mono text-xs">url_deposit</code>, <span class="font-mono text-xs">withdraw</span> returns <code class="font-mono text-xs">url_withdraw</code>. Parameters may be sent as <span class="font-bold">HTTP headers</span> <span class="italic">or</span> a <span class="font-bold">JSON body</span> &mdash; headers take precedence over body fields.</p>
 
-      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Headers</h4>
-      <div class="border-2 border-ink mb-6">
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Parameters <span class="text-stone-300 normal-case">— header or body</span></h4>
+      <div class="border-2 border-ink mb-3">
         <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
-          <span class="col-span-3">Header</span><span class="col-span-2">Required</span><span class="col-span-7">Description</span>
+          <span class="col-span-3">Name</span><span class="col-span-3">Type</span><span class="col-span-2">Required</span><span class="col-span-4">Description</span>
         </div>
         <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
-          <code class="col-span-3 font-mono text-coral text-xs">access_token</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">User's access token (JWT) from <span class="font-mono">/users/login</span>.</span>
+          <code class="col-span-3 font-mono text-coral text-xs">vitvit_user_id</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-2 pill bg-lime w-fit">yes¹</span><span class="col-span-4 text-stone-600 text-xs">VitVit user UUID.</span>
         </div>
         <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
-          <code class="col-span-3 font-mono text-coral text-xs">external_address</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">External Solana address tied to the operation.</span>
+          <code class="col-span-3 font-mono text-coral text-xs">deposit_address</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-2 pill bg-paper w-fit">deposit</span><span class="col-span-4 text-stone-600 text-xs">External wallet address the user deposits to. Used for the deposit flow.</span>
         </div>
         <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
-          <code class="col-span-3 font-mono text-coral text-xs">init_op</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">Operation to initialize, e.g. <span class="font-mono">deposit</span>.</span>
+          <code class="col-span-3 font-mono text-coral text-xs">init_op</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-2 pill bg-lime w-fit">yes¹</span><span class="col-span-4 text-stone-600 text-xs">Operation: <span class="font-mono">deposit</span> or <span class="font-mono">withdraw</span>.</span>
         </div>
         <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
-          <code class="col-span-3 font-mono text-coral text-xs">amount</code><span class="col-span-2 pill bg-lime w-fit">yes</span><span class="col-span-7 text-stone-600 text-xs">Operation amount, e.g. <span class="font-mono">500</span>.</span>
+          <code class="col-span-3 font-mono text-coral text-xs">amount</code><span class="col-span-3 font-mono text-xs text-stone-500">number (str)</span><span class="col-span-2 pill bg-lime w-fit">yes¹</span><span class="col-span-4 text-stone-600 text-xs">Positive numeric amount. Coerced via <span class="font-mono">Number()</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">partner_id</code><span class="col-span-3 font-mono text-xs text-stone-500">string (uuid)</span><span class="col-span-2 pill bg-lime w-fit">yes¹</span><span class="col-span-4 text-stone-600 text-xs">Partner identifier (UUID), e.g. <span class="font-mono">11111111-3333-...</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">partner_fee</code><span class="col-span-3 font-mono text-xs text-stone-500">number (str)</span><span class="col-span-2 pill bg-paper w-fit">no</span><span class="col-span-4 text-stone-600 text-xs">Non-negative fee, if provided.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">partner_address</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-2 pill bg-paper w-fit">no</span><span class="col-span-4 text-stone-600 text-xs">Partner wallet address.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">Content-Type</code><span class="col-span-3 font-mono text-xs text-stone-500">header</span><span class="col-span-2 pill bg-paper w-fit">body</span><span class="col-span-4 text-stone-600 text-xs">Must be <span class="font-mono">application/json</span> if a body is sent.</span>
         </div>
       </div>
+      <p class="text-xs text-stone-500 mb-6 font-mono">¹ Required either as a header or as a field in the JSON body.</p>
 
+      <!-- DEPOSIT FLOW -->
+      <div class="flex items-center gap-2 mb-3 mt-2">
+        <span class="font-mono text-[11px] uppercase tracking-widest bg-lime border border-ink px-2 py-0.5">init_op: deposit</span>
+        <span class="font-mono text-xs text-stone-500">→ url_deposit</span>
+      </div>
       <div class="grid lg:grid-cols-2 gap-4">
         <div>
           <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
-            <span>cURL request</span><span class="text-lime">shell</span>
+            <span>cURL — deposit</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> -X POST \
+  https://widget.vitvit.cash/api/partner/log-user \
+  -H "<span class="tok-key">Content-Type</span>: application/json" \
+  -H "<span class="tok-key">vitvit_user_id</span>: 2976bc32-...a10c" \
+  -H "<span class="tok-key">deposit_address</span>: 7CNGUqh8...tqsS" \
+  -H "<span class="tok-key">init_op</span>: deposit" \
+  -H "<span class="tok-key">amount</span>: 250" \
+  -H "<span class="tok-key">partner_id</span>: 94e5300a-...b896f0" \
+  -H "<span class="tok-key">partner_fee</span>: 1.5" \
+  -H "<span class="tok-key">partner_address</span>: 7CNGUqh8...tqsS"</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>200 — Response</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"ok"</span><span class="tok-punct">:</span> <span class="tok-bool">1</span>,
+  <span class="tok-key">"url_deposit"</span><span class="tok-punct">:</span> <span class="tok-str">"https://widget.vitvit.cash/partner/deposit</span>
+    <span class="tok-str">?clientId=...&amp;phone=...&amp;partner_id=...</span>
+    <span class="tok-str">&amp;external_address=...&amp;amount=250</span>
+    <span class="tok-str">&amp;partner_fee=1.5&amp;partner_address=..."</span>
+}</pre>
+        </div>
+      </div>
+
+      <!-- WITHDRAW FLOW -->
+      <div class="flex items-center gap-2 mb-3 mt-8">
+        <span class="font-mono text-[11px] uppercase tracking-widest bg-coral text-paper border border-ink px-2 py-0.5">init_op: withdraw</span>
+        <span class="font-mono text-xs text-stone-500">→ url_withdraw</span>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL — withdraw</span><span class="text-lime">shell</span>
           </div>
           <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> --location --request POST \
-  'https://dev-vital-finance-infra.vercel.app/api/partner/log-user' \
-  --header '<span class="tok-key">access_token</span>: eyJhbGciOiJIUzI1NiI....' \
-  --header '<span class="tok-key">external_address</span>: 4kmMvyEtpJed...44z8' \
-  --header '<span class="tok-key">init_op</span>: deposit' \
-  --header '<span class="tok-key">amount</span>: 500' \
+  'http://localhost:3000/api/partner/log-user' \
+  --header '<span class="tok-key">vitvit_user_id</span>: 2976bc32-...a10c' \
+  --header '<span class="tok-key">init_op</span>: withdraw' \
+  --header '<span class="tok-key">amount</span>: 100' \
+  --header '<span class="tok-key">partner_id</span>: 94e5300a-...b896f0' \
+  --header '<span class="tok-key">partner_fee</span>: 0.03' \
+  --header '<span class="tok-key">partner_address</span>: 7CNGUqh8...tqsS' \
   --data ''</pre>
         </div>
         <div>
@@ -548,24 +677,170 @@ tailwind.config = {
           </div>
           <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
   <span class="tok-key">"ok"</span><span class="tok-punct">:</span> <span class="tok-bool">1</span>,
-  <span class="tok-key">"url_deposit"</span><span class="tok-punct">:</span> <span class="tok-str">"https://widget-vitvit-cash-new.vercel.app</span>
-    <span class="tok-str">/partner/deposit</span>
-    <span class="tok-str">?clientId=57293bed-...f8b2</span>
-    <span class="tok-str">&amp;phone=50933330000</span>
-    <span class="tok-str">&amp;partner_id=99b6d390-...91196</span>
-    <span class="tok-str">&amp;first_name=Hello 2</span>
-    <span class="tok-str">&amp;external_address=4kmMvy...44z8</span>
-    <span class="tok-str">&amp;amount=500</span>
-    <span class="tok-str">&amp;access_token=eyJhbGci...."</span>
+  <span class="tok-key">"url_withdraw"</span><span class="tok-punct">:</span> <span class="tok-str">"http://localhost:3000/partner/withdraw</span>
+    <span class="tok-str">?clientId=2976bc32-...a10c</span>
+    <span class="tok-str">&amp;phone=18096618345</span>
+    <span class="tok-str">&amp;partner_id=94e5300a-...b896f0</span>
+    <span class="tok-str">&amp;external_address=7CNGUqh8...tqsS</span>
+    <span class="tok-str">&amp;amount=100&amp;partner_fee=0.03</span>
+    <span class="tok-str">&amp;partner_address=7CNGUqh8...tqsS"</span>
 }</pre>
         </div>
       </div>
 
+      <!-- BODY ALTERNATIVE -->
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mt-8 mb-3">Body — alternative to headers</h4>
+      <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"vitvit_user_id"</span><span class="tok-punct">:</span> <span class="tok-str">"uuid"</span>,
+  <span class="tok-key">"deposit_address"</span><span class="tok-punct">:</span> <span class="tok-str">"0x..."</span>,
+  <span class="tok-key">"init_op"</span><span class="tok-punct">:</span> <span class="tok-str">"deposit"</span>,
+  <span class="tok-key">"amount"</span><span class="tok-punct">:</span> <span class="tok-bool">100</span>,
+  <span class="tok-key">"partner_id"</span><span class="tok-punct">:</span> <span class="tok-str">"94e5300a-f046-..."</span>,
+  <span class="tok-key">"partner_fee"</span><span class="tok-punct">:</span> <span class="tok-bool">1.5</span>,
+  <span class="tok-key">"partner_address"</span><span class="tok-punct">:</span> <span class="tok-str">"0x..."</span>
+}</pre>
+
       <div class="border-2 border-ink bg-lime p-5 flex items-start gap-4 mt-6">
         <span class="font-display font-black text-2xl leading-none">→</span>
         <div>
-          <p class="font-bold text-sm">Redirect the user to <code class="font-mono text-xs">url_deposit</code>.</p>
-          <p class="text-sm text-ink/80 mt-1">The returned link opens the hosted deposit widget pre-filled with the client, phone, partner, amount, and a scoped access token.</p>
+          <p class="font-bold text-sm">Redirect the user to the returned <code class="font-mono text-xs">url_deposit</code> / <code class="font-mono text-xs">url_withdraw</code> to complete the flow.</p>
+        </div>
+      </div>
+
+      <!-- Error responses -->
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mt-8 mb-3">Error responses</h4>
+      <p class="text-sm text-stone-600 mb-4">All errors share the shape:</p>
+      <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono mb-6">{
+  <span class="tok-key">"error"</span><span class="tok-punct">:</span> <span class="tok-str">"&lt;human message&gt;"</span>,
+  <span class="tok-key">"code"</span><span class="tok-punct">:</span> <span class="tok-str">"&lt;MACHINE_CODE&gt;"</span>,
+  <span class="tok-key">"details"</span><span class="tok-punct">:</span> <span class="tok-str">"&lt;optional&gt;"</span>,
+  <span class="tok-key">"required"</span><span class="tok-punct">:</span> [<span class="tok-str">"&lt;only on 400 MISSING_PARAMETERS&gt;"</span>]
+}</pre>
+
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-2">Status</span><span class="col-span-4">code</span><span class="col-span-6">Cause</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">400</span><code class="col-span-4 font-mono text-coral text-xs">INVALID_JSON</code><span class="col-span-6 text-stone-600 text-xs">Body present but not parseable as JSON.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">400</span><code class="col-span-4 font-mono text-coral text-xs">MISSING_PARAMETERS</code><span class="col-span-6 text-stone-600 text-xs">A required param missing. <span class="font-mono">required</span> lists the missing names.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">404</span><code class="col-span-4 font-mono text-coral text-xs">USER_NOT_FOUND</code><span class="col-span-6 text-stone-600 text-xs">No row in <span class="font-mono">users</span> with the given <span class="font-mono">vitvit_user_id</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">405</span><code class="col-span-4 font-mono text-coral text-xs">METHOD_NOT_ALLOWED</code><span class="col-span-6 text-stone-600 text-xs">Method other than <span class="font-mono">POST</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">415</span><code class="col-span-4 font-mono text-coral text-xs">UNSUPPORTED_MEDIA_TYPE</code><span class="col-span-6 text-stone-600 text-xs">Body sent without <span class="font-mono">Content-Type: application/json</span>.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">422</span><code class="col-span-4 font-mono text-coral text-xs">INVALID_AMOUNT</code><span class="col-span-6 text-stone-600 text-xs"><span class="font-mono">amount</span> is non-numeric or ≤ 0.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">422</span><code class="col-span-4 font-mono text-coral text-xs">INVALID_PARTNER_FEE</code><span class="col-span-6 text-stone-600 text-xs"><span class="font-mono">partner_fee</span> is non-numeric or negative.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">500</span><code class="col-span-4 font-mono text-coral text-xs">INTERNAL_ERROR</code><span class="col-span-6 text-stone-600 text-xs">Unhandled server error.</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">502</span><code class="col-span-4 font-mono text-coral text-xs">DB_ERROR</code><span class="col-span-6 text-stone-600 text-xs">Supabase query failed for a reason other than "no rows".</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+          <span>Example error</span><span class="text-lime">json</span>
+        </div>
+        <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"error"</span><span class="tok-punct">:</span> <span class="tok-str">"Missing required parameters"</span>,
+  <span class="tok-key">"code"</span><span class="tok-punct">:</span> <span class="tok-str">"MISSING_PARAMETERS"</span>,
+  <span class="tok-key">"required"</span><span class="tok-punct">:</span> [<span class="tok-str">"amount"</span>, <span class="tok-str">"init_op"</span>]
+}</pre>
+      </div>
+    </section>
+
+    <!-- ENDPOINT 7: CONFIGURE WEBHOOK -->
+    <section id="webhooks" class="scroll-mt-24">
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="font-mono text-xs verb-post bg-ink px-2.5 py-1 method-tag">POST</span>
+        <code class="font-mono text-sm md:text-base font-bold">/partners/:id/webhooks</code>
+        <button data-copy="webhooks" class="copy-btn ml-auto font-mono text-[11px] uppercase tracking-wider border-2 border-ink px-3 py-1.5 hover:bg-ink hover:text-paper transition flex items-center gap-1.5">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span class="label">Copy for LLM</span>
+        </button>
+      </div>
+      <p class="text-stone-700 mb-6 max-w-2xl">Configures the webhook URL and signing secret used to deliver event notifications to a partner. The authenticated partner may only modify their own configuration &mdash; the <code class="font-mono text-xs">:id</code> path param must match the partner resolved from the token, else <span class="pill bg-coral text-paper">403</span>.</p>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Path params</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 px-4 py-3 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">id</code><span class="col-span-9 text-stone-600 text-xs">Partner ID. Must match the authenticated partner.</span>
+        </div>
+      </div>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mb-3">Request body</h4>
+      <div class="border-2 border-ink mb-6">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-3">Field</span><span class="col-span-3">Type</span><span class="col-span-6">Constraints</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">webhook_url</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600 text-xs">HTTPS URL to a public host (validated by <span class="font-mono">isSafeWebhookUrl</span> — rejects <span class="font-mono">http://</span>, <span class="font-mono">localhost</span>, private IP ranges).</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <code class="col-span-3 font-mono text-coral text-xs">webhook_secret</code><span class="col-span-3 font-mono text-xs text-stone-500">string</span><span class="col-span-6 text-stone-600 text-xs">32–256 characters. Signs outbound webhook payloads so the partner can verify authenticity.</span>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-4">
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>cURL request</span><span class="text-lime">shell</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono"><span class="text-stone-500">curl</span> -X POST \
+  https://api.vital.example/partners/PRT_123/webhooks \
+  -H "<span class="tok-key">Authorization</span>: Bearer $PARTNER_TOKEN" \
+  -H "<span class="tok-key">Content-Type</span>: application/json" \
+  -d '{
+    <span class="tok-key">"webhook_url"</span><span class="tok-punct">:</span> <span class="tok-str">"https://partner.example.com</span>
+                   <span class="tok-str">/webhooks/vital"</span>,
+    <span class="tok-key">"webhook_secret"</span><span class="tok-punct">:</span> <span class="tok-str">"0f3a...&lt;32-256&gt;"</span>
+  }'</pre>
+        </div>
+        <div>
+          <div class="flex items-center justify-between bg-stone-800 text-paper px-4 py-2 font-mono text-[11px] uppercase tracking-wider">
+            <span>200 — Response</span><span class="text-lime">json</span>
+          </div>
+          <pre class="code-scroll overflow-x-auto bg-ink text-paper p-4 text-xs leading-relaxed font-mono">{
+  <span class="tok-key">"success"</span><span class="tok-punct">:</span> <span class="tok-bool">true</span>,
+  <span class="tok-key">"webhook"</span><span class="tok-punct">:</span> {
+    <span class="tok-key">"webhook_url"</span><span class="tok-punct">:</span> <span class="tok-str">"https://partner.example.com</span>
+                   <span class="tok-str">/webhooks/vital"</span>,
+    <span class="tok-key">"webhook_secret"</span><span class="tok-punct">:</span> <span class="tok-str">"a-strong-shared-</span>
+                      <span class="tok-str">secret-...chars"</span>
+  }
+}</pre>
+        </div>
+      </div>
+
+      <h4 class="font-mono text-xs uppercase tracking-widest text-stone-400 mt-6 mb-3">Error responses</h4>
+      <div class="border-2 border-ink mb-4">
+        <div class="grid grid-cols-12 font-mono text-xs uppercase tracking-wider bg-ink text-paper px-4 py-2">
+          <span class="col-span-2">Status</span><span class="col-span-4">When</span><span class="col-span-6">message</span>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">400</span><span class="col-span-4 text-stone-600 text-xs">Invalid URL</span><code class="col-span-6 font-mono text-stone-600 text-xs">webhook_url must be an https URL pointing to a public host</code>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">400</span><span class="col-span-4 text-stone-600 text-xs">Invalid secret</span><code class="col-span-6 font-mono text-stone-600 text-xs">webhook_secret must be 32-256 characters</code>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">400</span><span class="col-span-4 text-stone-600 text-xs">Update failed</span><code class="col-span-6 font-mono text-stone-600 text-xs">{ "success": false, "error": "Update failed" }</code>
+        </div>
+        <div class="grid grid-cols-12 px-4 py-3 border-t border-ink/10 text-sm items-center">
+          <span class="col-span-2 pill bg-coral text-paper w-fit">403</span><span class="col-span-4 text-stone-600 text-xs"><span class="font-mono">:id</span> missing / mismatch</span><code class="col-span-6 font-mono text-stone-600 text-xs">Operation not allowed</code>
         </div>
       </div>
     </section>
@@ -636,14 +911,16 @@ tailwind.config = {
   "update-user": "## PUT /users/:id\nUpdate allowed fields on a user. The caller's partner identity (from the token) must carry the EDIT action in the user's allowed_partners. Protected fields are rejected.\n\nPath params:\n- id: target user's ID\n\nBody: non-empty JSON object. Rejected fields if present: id, phone, partner_id, allowed_partners, wallet_id, wallet_address.\n\nExample:\n```bash\ncurl -X PUT 'https://dev-vital-finance-infra.vercel.app/users/USER_ID' \\\n  -H 'Authorization: Bearer $JWT' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"first_name\":\"Jean\",\"last_name\":\"Beaudry\",\"email\":\"jean@example.com\"}'\n```\n\nResponses:\n- 200: updated user object\n- 400: { \"success\": false, \"message\": \"Request body must be a non-empty object\" }\n- 400: { \"success\": false, \"message\": \"Cannot update protected fields: phone, wallet_id\" }\n- 403: { \"success\": false, \"message\": \"Operation not allowed\" }\n- 404: { \"success\": false, \"message\": \"User not found\" }\n",
   "reset-pin": "## POST /auth/partner/reset-pin\nResets a user's 6-digit PIN. The caller's partner identity (from the token) must include the PIN action in the target user's allowed_partners.\n\nBody:\n- user_id (string): UUID of target user\n- pin (string): exactly 6 digits\n\nExample:\n```bash\ncurl -X POST 'https://dev-vital-finance-infra.vercel.app/auth/partner/reset-pin' \\\n  -H 'Authorization: Bearer $JWT' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"user_id\":\"11111111-2222-3333-4444-555555555555\",\"pin\":\"123456\"}'\n```\n\nResponses:\n- 200: { \"success\": true, \"message\": \"Password has been changed\" }\n- 400: { \"success\": false, \"message\": \"user_id and/or pin missing\" }\n- 400: { \"success\": false, \"message\": \"PIN must be exactly 6 digits\" }\n- 403: { \"success\": false, \"message\": \"Operation not allowed\" }\n- 404: { \"success\": false, \"message\": \"User not found\" }\n- 500: { \"success\": false, \"message\": \"<error message>\" }\n",
   "login": "## POST /users/login\nAuthenticate a user with phone + PIN. Returns access/refresh tokens and the user's profile including their provisioned Solana wallet.\n\nRequest body:\n- phone (string): registered user phone\n- pin (string): user PIN\n\nExample:\n```bash\ncurl --location 'https://dev-vital-finance-infra.vercel.app/users/login' \\\n  --header 'Content-Type: application/json' \\\n  --header 'Authorization: Bearer ....' \\\n  --data '{\"phone\":\"50933330000\",\"pin\":\"000000\"}'\n```\n\nResponse 200 (abridged):\n```json\n{\n  \"id\": \"57293bed-7916-4edd-ad61-42239d63f8b2\",\n  \"phone\": \"50933330000\",\n  \"accessToken\": \"YsSFxYEobPYe1dwRKpQ....\",\n  \"refreshToken\": \"fs5sdt3heun3\",\n  \"data\": { \"wallet_address\": \"BzYNKwvF8e...YH3R\", \"wallet_id\": \"6a8b17ff-2589-...\", \"account_type\": \"CUSTOMER\", \"extra\": { \"wallet\": { } } }\n}\n```\n",
-  "deposit": "## POST /api/partner/log-user\nAuthenticate a user on the partner's behalf and receive a hosted widget link the user opens to complete a deposit. All inputs are passed as HEADERS; the request body is empty.\n\nHeaders:\n- access_token (required): user's access token (JWT) from /users/login\n- external_address (required): external Solana address tied to the operation\n- init_op (required): operation to initialize, e.g. deposit\n- amount (required): operation amount, e.g. 500\n\nExample:\n```bash\ncurl --location --request POST 'https://dev-vital-finance-infra.vercel.app/api/partner/log-user' \\\n  --header 'access_token: eyJhbGciOiJIUzI1NiI....' \\\n  --header 'external_address: 4kmMvyEtpJedpVeCuj5AU25yzQyPuLbiPgRVm5EZ44z8' \\\n  --header 'init_op: deposit' \\\n  --header 'amount: 500' \\\n  --data ''\n```\n\nResponse 200:\n```json\n{\n  \"ok\": 1,\n  \"url_deposit\": \"https://widget-vitvit-cash-new.vercel.app/partner/deposit?clientId=...&phone=50933330000&partner_id=...&first_name=Hello 2&external_address=4kmMvy...44z8&amount=500&access_token=eyJhbGci....\"\n}\n```\n\nRedirect the user to `url_deposit` to open the hosted deposit widget, pre-filled with client, phone, partner, amount, and a scoped access token.\n",
+  "lookup": "## GET /users/:lookup/:value/key-value\nLook up a user and get a compact key-value profile. Two path variants:\n- GET /users/phone/:phone/key-value — look up by phone, e.g. 50933330006\n- GET /users/id/:id/key-value — look up by user UUID, e.g. 5df69f59-8a81-4d53-a3a2-5f9ea531e98a\nRequires partner Bearer token.\n\nHeaders:\n- Authorization (required): Bearer <PARTNER_SECRET>\n\nExample (by phone):\n```bash\ncurl --location 'http://127.0.0.1:3002/users/phone/50933330006/key-value' \\\n  --header 'Authorization: Bearer PARTNER_SECRET'\n```\nExample (by id):\n```bash\ncurl --location 'http://127.0.0.1:3002/users/id/5df69f59-8a81-4d53-a3a2-5f9ea531e98a/key-value' \\\n  --header 'Authorization: Bearer PARTNER_SECRET'\n```\n\nResponse 200:\n```json\n{\n  \"id\": \"5df69f59-8a81-4d53-a3a2-5f9ea531e98a\",\n  \"phone\": \"50933330006\",\n  \"first_name\": \"Hello_1\",\n  \"last_name\": \"test\",\n  \"wallet_address\": \"7MczvZNNpUXWPwtBncCdv554UiuGLqgVwCjqLG65XMpy\",\n  \"wallet_id\": \"b544dc12-551d-52fe-8745-3d3cfc5efc71\",\n  \"kyc\": null\n}\n```\n",
+  "deposit": "## POST /api/partner/log-user\nLogs a partner-initiated user session and returns a URL to redirect the user to. The init_op drives the flow: `deposit` returns `url_deposit`, `withdraw` returns `url_withdraw`. Parameters may be sent as HTTP HEADERS or a JSON BODY. Headers take precedence over body fields. If a body is sent it must use Content-Type: application/json.\n\nParameters (header or body):\n- vitvit_user_id (string, required¹): VitVit user UUID\n- deposit_address (string, required for deposit): external wallet address the user deposits to\n- init_op (string, required¹): deposit or withdraw\n- amount (number/string, required¹): positive numeric amount, coerced via Number()\n- partner_id (string uuid, required¹): partner identifier (UUID), e.g. 94e5300a-f046-...\n- partner_fee (number/string, optional): non-negative fee\n- partner_address (string, optional): partner wallet address\n¹ required either as a header or as a JSON body field.\n\nExample — deposit:\n```bash\ncurl -X POST https://widget.vitvit.cash/api/partner/log-user \\\n  -H 'Content-Type: application/json' \\\n  -H 'vitvit_user_id: 2976bc32-a376-482e-a90a-62d83b61a10c' \\\n  -H 'deposit_address: 7CNGUqh8xhy1YxoeTxo7wbp4tw924SyKQR2VzUiitqsS' \\\n  -H 'init_op: deposit' \\\n  -H 'amount: 250' \\\n  -H 'partner_id: 94e5300a-f046-4c0c-8dda-ec71e3b896f0' \\\n  -H 'partner_fee: 1.5' \\\n  -H 'partner_address: 7CNGUqh8xhy1YxoeTxo7wbp4tw924SyKQR2VzUiitqsS'\n```\nResponse 200:\n```json\n{ \"ok\": 1, \"url_deposit\": \"https://widget.vitvit.cash/partner/deposit?clientId=...&phone=...&partner_id=...&external_address=...&amount=250&partner_fee=1.5&partner_address=...\" }\n```\n\nExample — withdraw:\n```bash\ncurl --location --request POST 'http://localhost:3000/api/partner/log-user' \\\n  --header 'vitvit_user_id: 2976bc32-a376-482e-a90a-62d83b61a10c' \\\n  --header 'init_op: withdraw' \\\n  --header 'amount: 100' \\\n  --header 'partner_id: 94e5300a-f046-4c0c-8dda-ec71e3b896f0' \\\n  --header 'partner_fee: 0.03' \\\n  --header 'partner_address: 7CNGUqh8xhy1YxoeTxo7wbp4tw924SyKQR2VzUiitqsS' \\\n  --data ''\n```\nResponse 200:\n```json\n{ \"ok\": 1, \"url_withdraw\": \"http://localhost:3000/partner/withdraw?clientId=2976bc32-a376-482e-a90a-62d83b61a10c&phone=18096618345&partner_id=94e5300a-f046-4c0c-8dda-ec71e3b896f0&external_address=7CNGUqh8xhy1YxoeTxo7wbp4tw924SyKQR2VzUiitqsS&amount=100&partner_fee=0.03&partner_address=7CNGUqh8xhy1YxoeTxo7wbp4tw924SyKQR2VzUiitqsS\" }\n```\n\nBody alternative:\n```json\n{ \"vitvit_user_id\": \"uuid\", \"deposit_address\": \"0x...\", \"init_op\": \"deposit\", \"amount\": 100, \"partner_id\": \"94e5300a-f046-...\", \"partner_fee\": 1.5, \"partner_address\": \"0x...\" }\n```\nRedirect the user to the returned url_deposit / url_withdraw to complete the flow.\n\nError shape: { \"error\": \"<human message>\", \"code\": \"<MACHINE_CODE>\", \"details\": \"<optional>\", \"required\": [\"<only on 400 MISSING_PARAMETERS>\"] }\nError codes:\n- 400 INVALID_JSON: body present but not parseable as JSON\n- 400 MISSING_PARAMETERS: a required param missing; `required` lists missing names\n- 404 USER_NOT_FOUND: no row in users with given vitvit_user_id\n- 405 METHOD_NOT_ALLOWED: method other than POST\n- 415 UNSUPPORTED_MEDIA_TYPE: body sent without Content-Type: application/json\n- 422 INVALID_AMOUNT: amount non-numeric or <= 0\n- 422 INVALID_PARTNER_FEE: partner_fee non-numeric or negative\n- 500 INTERNAL_ERROR: unhandled server error\n- 502 DB_ERROR: Supabase query failed for a reason other than no rows\n",
+  "webhooks": "## POST /partners/:id/webhooks\nConfigures the webhook URL and signing secret used to deliver event notifications to a partner. Requires a valid Bearer token (fastify.authenticate). The authenticated partner may only modify their own config — the :id path param must match the partner resolved from the token, else 403.\n\nPath params:\n- id (string): partner ID. Must match the authenticated partner.\n\nRequest body:\n- webhook_url (string): HTTPS URL pointing to a public host (validated by isSafeWebhookUrl — rejects http://, localhost, private IP ranges).\n- webhook_secret (string): 32–256 characters. Used to sign outbound webhook payloads so the partner can verify authenticity.\n\nExample:\n```bash\ncurl -X POST https://api.vital.example/partners/PRT_123/webhooks \\\n  -H 'Authorization: Bearer $PARTNER_TOKEN' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"webhook_url\":\"https://partner.example.com/webhooks/vital\",\"webhook_secret\":\"0f3a...<32-256 chars>\"}'\n```\n\nResponse 200:\n```json\n{ \"success\": true, \"webhook\": { \"webhook_url\": \"https://partner.example.com/webhooks/vital\", \"webhook_secret\": \"a-strong-shared-secret-at-least-32-chars\" } }\n```\n\nErrors:\n- 400 (invalid URL): { \"success\": false, \"message\": \"webhook_url must be an https URL pointing to a public host\" }\n- 400 (invalid secret): { \"success\": false, \"message\": \"webhook_secret must be 32-256 characters\" }\n- 400 (update failed): { \"success\": false, \"error\": \"Update failed\" }\n- 403 (:id missing or mismatch): { \"success\": false, \"message\": \"Operation not allowed\" }\n",
   "wallet": "## Wallet object\nReturned under data.extra.wallet on /users/login. A developer-custodied Solana account, provisioned per user.\n\nFields:\n- id (string): internal wallet UUID\n- name (string): \"phone\"\n- refId (string): reference (phone number)\n- state (string): LIVE\n- address (string): Solana public key\n- blockchain (string): SOL-DEVNET\n- accountType (string): EOA\n- custodyType (string): DEVELOPER\n- walletSetId (string)\n- createDate (string, ISO 8601)\n"
 }
 </script>
 
 <script>
   const apiMd = JSON.parse(document.getElementById('api-md').textContent);
-  const mdOrder = ['auth','create-user','update-user','reset-pin','login','deposit','wallet'];
+  const mdOrder = ['auth','create-user','update-user','reset-pin','login','lookup','deposit','webhooks','wallet'];
 
   async function copyText(text, btn) {
     try {
@@ -686,6 +963,7 @@ tailwind.config = {
 </script>
 
 <script>
+  const sections = document.querySelectorAll('section[id]');
   const links = document.querySelectorAll('aside a[href^="#"]');
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
